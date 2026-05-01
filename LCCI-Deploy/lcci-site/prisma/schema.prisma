@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id            String   @id @default(cuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  resetToken    String?
+  resetExpiry   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  activityLogs  ActivityLog[]
+}
+
+model HeroSection {
+  id            String   @id @default("singleton")
+  title         String
+  titleUr       String   @default("")
+  subtitle      String
+  subtitleUr    String   @default("")
+  imageUrl      String
+  btn1Text      String
+  btn1TextUr    String   @default("")
+  btn2Text      String
+  btn2TextUr    String   @default("")
+  btn1Enabled   Boolean  @default(true)
+  btn2Enabled   Boolean  @default(true)
+  learnMoreHref String   @default("/about")
+  memberHref    String   @default("/contact")
+  updatedAt     DateTime @updatedAt
+}
+
+model SiteSettings {
+  id              String   @id @default("singleton")
+  primaryColor    String   @default("#0B6E4F")
+  secondaryColor  String   @default("#0A2A43")
+  accentColor     String   @default("#FFD166")
+  backgroundColor String   @default("#F5F7FA")
+  logoUrl         String   @default("")
+  topBarPhone     String   @default("+92-XXX-XXXXXXX")
+  topBarEmail     String   @default("info@lcci.org.pk")
+  facebookUrl     String   @default("")
+  twitterUrl      String   @default("")
+  linkedinUrl     String   @default("")
+  youtubeUrl      String   @default("")
+  footerText      String   @default("© Layyah Chamber of Commerce & Industry")
+  address         String   @default("Layyah, Punjab, Pakistan")
+  mapEmbedUrl     String   @default("")
+  metaTitle       String   @default("LCCI – Layyah Chamber of Commerce & Industry")
+  metaDescription String   @default("Supporting local businesses in Layyah.")
+  metaKeywords    String   @default("LCCI, Layyah, Chamber of Commerce")
+  ogImageUrl      String   @default("")
+  updatedAt       DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  titleUr     String   @default("")
+  slug        String   @unique
+  description String
+  descriptionUr String @default("")
+  icon        String   @default("briefcase")
+  active      Boolean  @default(true)
+  showOnHome  Boolean  @default(false)
+  homeOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  requests    ServiceRequest[]
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  title       String
+  titleUr     String   @default("")
+  slug        String   @unique
+  description String
+  descriptionUr String @default("")
+  imageUrl    String   @default("")
+  date        DateTime
+  showOnHome  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  description String
+  category    String   @default("General")
+  date        DateTime
+  imageUrl    String   @default("")
+  pdfUrl      String   @default("")
+  highlighted Boolean  @default(false)
+  hidden      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  gallery     EventGallery[]
+}
+
+model EventGallery {
+  id       String @id @default(cuid())
+  eventId  String
+  imageUrl String
+  sortOrder Int   @default(0)
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model Leadership {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  photoUrl  String   @default("")
+  bio       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WhyChooseItem {
+  id        String   @id @default(cuid())
+  text      String
+  textUr    String   @default("")
+  sortOrder Int      @default(0)
+}
+
+model AboutContent {
+  id        String   @id @default("singleton")
+  mission   String
+  missionUr String   @default("")
+  vision    String
+  visionUr  String   @default("")
+  history   String
+  historyUr String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  websiteUrl String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model MembershipApplication {
+  id              String   @id @default(cuid())
+  businessName    String
+  ownerName       String
+  address         String
+  businessType    String
+  registrationNo  String
+  contactNo       String
+  email           String
+  cnicPath        String?
+  businessDocsPath String?
+  status          String   @default("pending")
+  remarks         String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ServiceRequest {
+  id          String   @id @default(cuid())
+  serviceId   String
+  name        String
+  email       String
+  phone       String
+  message     String
+  attachmentPath String?
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  adminId   String?
+  action    String
+  entity    String
+  details   String   @default("")
+  ip        String?
+  createdAt DateTime @default(now())
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+}

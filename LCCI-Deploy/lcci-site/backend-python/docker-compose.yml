@@ -1,0 +1,39 @@
+# Docker Compose for local development
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: lcci-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lcci
+      MYSQL_USER: lcci
+      MYSQL_PASSWORD: lcci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - lcci-network
+
+  backend:
+    build: .
+    container_name: lcci-backend
+    environment:
+      DATABASE_URL: mysql+pymysql://lcci:lcci@mysql:3306/lcci
+      SECRET_KEY: development-secret-key-change-in-production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    networks:
+      - lcci-network
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  mysql_data:
+
+networks:
+  lcci-network:
